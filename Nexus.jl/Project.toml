@@ -1,0 +1,10 @@
+name = "Nexus"
+uuid = "6edb326f-d9e7-4a7a-bc92-044b00cd93f0"
+authors = ["Jules <jules@example.com>"]
+version = "0.1.0"
+
+[deps]
+# Dependencies will be added here later
+
+[compat]
+julia = "1"
