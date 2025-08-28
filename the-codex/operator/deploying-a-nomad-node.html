@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploying a Nomad Node - The Codex</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>The Nexus Protocol: Node Operator's Manual</h1>
+        <a href="../index.html">&larr; Back to The Codex</a>
+    </header>
+    <main>
+        <p>Welcome, Architect. This manual is the definitive guide to deploying, configuring, and maintaining a node on the Nexus Protocol. By running a node, you are not merely a user; you are a sovereign participant, a guardian of the network's integrity, and a foundational pillar of a new digital nation.</p>
+
+        <h2>Chapter 1: Deploying a Nomad Node</h2>
+        <p>This guide provides a complete, step-by-step process for installing a Nomad Node on a compatible Linux system (e.g., Ubuntu, Debian, CentOS) using the Sovereign Deployment Kit (The Forge).</p>
+
+        <h3>Prerequisites:</h3>
+        <ul>
+            <li>A machine running a supported Linux distribution.</li>
+            <li>A stable internet connection.</li>
+            <li><code>sudo</code> or <code>root</code> privileges for system-wide installation.</li>
+        </ul>
+
+        <h3>Step 1: Acquire The Forge SDK</h3>
+        <p>First, you must acquire the architect's primary tool. Open your terminal and download the latest version of The Forge SDK from the official repository.</p>
+        <pre><code># Download the binary
+wget https://your-repository.com/forge-nexus/latest/forge-nexus-amd64
+
+# Download the checksum for verification
+wget https://your-repository.com/forge-nexus/latest/forge-nexus-amd64.sha256</code></pre>
+
+        <h3>Step 2: Verify the Tool's Integrity</h3>
+        <p>A sovereign trusts nothing unverified. Before proceeding, perform a cryptographic check to ensure the SDK has not been tampered with. This is a non-negotiable step.</p>
+        <pre><code># Verify the checksum
+sha256sum -c forge-nexus-amd64.sha256</code></pre>
+        <p>You should see an <code>OK</code> confirmation. If the check fails, do not proceed. Delete the files and report the issue.</p>
+
+        <h3>Step 3: Prepare The Forge</h3>
+        <p>Once verified, make the SDK executable and move it to a system-wide path for easy access.</p>
+        <pre><code># Make the binary executable
+chmod +x forge-nexus-amd64
+
+# Move it to your local bin
+sudo mv forge-nexus-amd64 /usr/local/bin/forge-nexus</code></pre>
+        <p>You can now invoke the SDK from any location by simply typing <code>forge-nexus</code>.</p>
+
+        <h3>Step 4: Install the Nomad Node</h3>
+        <p>With The Forge prepared, you can now command it to build your post. This single command will automatically detect your operating system, download the correct <code>nexus-node</code> binary, verify its integrity, and install it on your system.</p>
+        <pre><code>sudo forge-nexus install --role=nomad</code></pre>
+        <p>The SDK will handle all dependencies and place the <code>nexus-node</code> binary in <code>/usr/local/bin/</code>. It will also create the necessary configuration directories and install a systemd service file.</p>
+
+        <h3>Step 5: Configure Your Post</h3>
+        <p>A generic post must be given a specific mission briefing. Run the interactive configuration command to customize your node.</p>
+        <pre><code>sudo forge-nexus configure</code></pre>
+        <p>This will guide you through setting a public alias for your node, adjusting resource limits, and other key settings.</p>
+
+        <h3>Step 6: Assume the Watch</h3>
+        <p>Your node is now installed and configured. The final step is to bring it online and assume your watch as a guardian of the network.</p>
+        <pre><code># Start the service
+sudo forge-nexus start
+
+# Check the status to ensure it is running correctly
+sudo forge-nexus status</code></pre>
+        <p>Congratulations, Architect. Your Nomad Node is now a live, sovereign participant in the Nexus Protocol.</p>
+    </main>
+</body>
+</html>
