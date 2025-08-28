@@ -45,18 +45,24 @@ func Deploy(tempBinaryPath, role string) error {
 	return nil
 }
 
-func createConfigDir(role string) (string, error) {
-	var configPath string
+// GetConfigPath determines the appropriate configuration directory path based on the role.
+func GetConfigPath(role string) (string, error) {
 	if role == "sentinel" {
-		configPath = "/etc/nexus"
-	} else { // 'nomad' or default
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
-		}
-		configPath = filepath.Join(home, ".nexus")
+		return "/etc/nexus", nil
 	}
+	// Default to nomad
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".nexus"), nil
+}
 
+func createConfigDir(role string) (string, error) {
+	configPath, err := GetConfigPath(role)
+	if err != nil {
+		return "", err
+	}
 	// os.MkdirAll is like `mkdir -p`, it creates parents and doesn't error if it exists.
 	if err := os.MkdirAll(configPath, 0755); err != nil {
 		return "", err
