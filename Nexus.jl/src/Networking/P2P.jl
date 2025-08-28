@@ -29,9 +29,33 @@ end
 
 function _handle_block(payload::String)
     println("P2P: Handling incoming block...")
-    # Placeholder for block handling logic
-    # 1. Deserialize the block payload
-    # 2. Call the new `validate_and_append_block` consensus function
+    try
+        block_dict = JSON.parse(payload)
+
+        # Manually deserialize transactions within the block
+        transactions = [
+            Transaction(
+                TransactionPayload(
+                    tx["payload"]["destination"],
+                    tx["payload"]["amount"],
+                    tx["payload"]["timestamp"]
+                ),
+                Vector{UInt8}(tx["sender_pubkey"]),
+                Vector{UInt8}(tx["signature"])
+            ) for tx in block_dict["transactions"]
+        ]
+
+        # Manually deserialize the block itself
+        block = Block(block_dict["header"], transactions)
+
+        println("P2P: Deserialized block successfully. Passing to consensus for validation...")
+
+        # Pass the fully reconstructed block to the consensus engine
+        BlockBuilder.validate_and_append_block(block)
+
+    catch ex
+        println("P2P: Failed to process block payload. Error: $ex")
+    end
 end
 
 

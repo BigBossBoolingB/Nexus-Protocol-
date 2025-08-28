@@ -6,23 +6,31 @@ using JSON
 
 @testset "Gossip Protocol Tests" begin
 
-    @testset "Message Routing for Blocks" begin
-        # This test ensures that when process_message receives a NetworkMessage
-        # of type "BLOCK", it correctly calls the _handle_block placeholder.
-        # Since _handle_block is just a placeholder, we can't assert a specific
-        # outcome, but calling it without error is a success for now.
-        let
-            # We don't need a real block, just a valid JSON payload string.
-            block_payload_json = "{\"header\":{},\"transactions\":[]}"
+    @testset "End-to-End Block Reception" begin
+        # This test validates the full cycle:
+        # NetworkMessage -> process_message -> _handle_block -> validate_and_append_block
 
-            message = NetworkMessage("BLOCK", block_payload_json)
-            message_json = JSON.json(message)
+        # 1. Reset the chain to a known state (genesis block only)
+        while length(BlockBuilder.BLOCKCHAIN) > 1 pop!(BlockBuilder.BLOCKCHAIN) end
+        @test length(BlockBuilder.BLOCKCHAIN) == 1
 
-            # This should call process_message, which routes to _handle_block.
-            # We expect it to run without error. The `@test_nowarn` macro
-            # checks that the expression executes without throwing an exception.
-            @test_nowarn P2P.process_message(message_json)
-        end
+        # 2. Manually create a valid new block to be "received"
+        previous_hash = BlockBuilder.get_previous_hash()
+        header = Dict("index" => 1, "previous_hash" => previous_hash, "timestamp" => time(), "merkle_root" => "abc")
+        valid_block = Block(header, [])
+
+        # 3. Serialize the block and wrap it in a NetworkMessage
+        block_payload_json = JSON.json(valid_block)
+        message = NetworkMessage("BLOCK", block_payload_json)
+        message_json = JSON.json(message)
+
+        # 4. Process the message
+        P2P.process_message(message_json)
+
+        # 5. Verify that the block was successfully validated and appended
+        @test length(BlockBuilder.BLOCKCHAIN) == 2
+        @test BlockBuilder.BLOCKCHAIN[2].header["index"] == 1
+        @test BlockBuilder.BLOCKCHAIN[2].header["merkle_root"] == "abc"
     end
 
 end
