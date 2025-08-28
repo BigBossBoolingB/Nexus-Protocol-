@@ -4,10 +4,16 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 )
 
 var osReleaseFile = "/etc/os-release" // Made a var for testing purposes
+
+// DetectArch returns the host's CPU architecture (e.g., "amd64", "arm64").
+func DetectArch() string {
+	return runtime.GOARCH
+}
 
 // DetectOS attempts to identify the host operating system by parsing the
 // /etc/os-release file. It looks for the "ID" field.
