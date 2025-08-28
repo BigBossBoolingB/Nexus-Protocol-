@@ -31,17 +31,15 @@ using Nexus.Networking.P2P
         @test isdefined(P2P, :connect)
         @test isdefined(P2P, :broadcast)
 
-        # Perform simple calls to the placeholder functions.
-        # This primarily validates their signatures. We expect them to run without error.
+        # Perform simple calls to the non-blocking placeholder functions.
+        # This primarily validates their signatures.
         let
-            # P2P.listen should just print a message and do nothing else
-            # We can't easily capture stdout here, so we just call it to ensure no crash.
-            P2P.listen(9000)
+            # Note: P2P.listen is now a long-running server loop and cannot be
+            # called directly in a unit test without causing it to hang.
+            # Its functionality will be validated through integration tests.
 
-            # P2P.connect should return true as a placeholder
+            # Test the remaining non-blocking functions
             @test P2P.connect("localhost", 9001) == true
-
-            # P2P.broadcast should just print a message
             P2P.broadcast(UInt8[0xDE, 0xAD, 0xBE, 0xEF])
         end
     end
