@@ -44,15 +44,56 @@ function compute_merkle_root(transactions::Vector{Transaction})
     return leaf_hashes[1]
 end
 
+
+"""
+    create_genesis_block() -> Block
+
+Creates the very first block in the blockchain, the Genesis Block.
+This block is unique as it has no parent and contains a special message.
+"""
+function create_genesis_block()
+    # The genesis message, permanently inscribed in the first transaction.
+    genesis_message = "A fortress is not built to be invincible, but to endure."
+
+    # Create a special genesis transaction.
+    # The public key and signature are placeholders, as this transaction
+    # originates from the protocol itself, not a user.
+    genesis_payload = TransactionPayload(genesis_message, 0.0, 1672531200.0) # Using a fixed timestamp
+    genesis_transaction = Transaction(genesis_payload, UInt8[], UInt8[])
+
+    transactions = [genesis_transaction]
+    merkle_root = compute_merkle_root(transactions)
+
+    # Construct the Genesis Block header.
+    header = Dict(
+        "index" => 0,
+        "previous_hash" => "0"^64, # 64 zeros for a SHA-256 hash
+        "timestamp" => 1672531200.0, # A fixed, arbitrary timestamp
+        "merkle_root" => merkle_root
+    )
+
+    genesis_block = Block(header, transactions)
+    println("BlockBuilder: Genesis Block created.")
+    return genesis_block
+end
+
+
 # A simple, in-memory representation of the blockchain for development.
 # In a real system, this would be a persistent, on-disk database.
-const BLOCKCHAIN = Block[
-    # Genesis block
-    Block(
-        Dict("index" => 0, "previous_hash" => "0", "timestamp" => 0.0, "merkle_root" => "0"),
-        Transaction[]
-    )
-]
+const BLOCKCHAIN = Block[]
+
+"""
+    initialize_chain!()
+
+Initializes the blockchain by clearing any existing state and adding the
+Genesis Block. This should be called once when a node starts.
+"""
+function initialize_chain!()
+    empty!(BLOCKCHAIN)
+    genesis_block = create_genesis_block()
+    push!(BLOCKCHAIN, genesis_block)
+    println("BlockBuilder: Blockchain initialized with Genesis Block.")
+end
 
 """
     get_previous_hash() -> String
