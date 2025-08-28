@@ -52,4 +52,19 @@ end
 export Networking
 
 
+# --- Metrics Module ---
+# Handles instrumentation and exposure of metrics for monitoring.
+module Metrics
+    using HTTP
+    using Sockets
+    using ..Core # For Mempool
+    using ..Consensus.BlockBuilder # For BLOCKCHAIN
+    include("Metrics.jl")
+    export start_metrics_server
+end
+
+# Make the Metrics module available to users of Nexus
+export Metrics
+
+
 end # module Nexus

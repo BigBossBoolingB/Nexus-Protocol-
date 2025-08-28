@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'nexus-nodes'
+    # In a real-world scenario, service discovery (e.g., dns_sd_configs)
+    # would be used instead of static targets for scalability.
+    static_configs:
+      # These targets assume the services are named 'sentinel' and 'nomad'
+      # in the docker-compose.yml file.
+      - targets: ['host.docker.internal:9090']
+        # A placeholder to imagine scraping multiple nodes.
+        # In a real Docker setup, we might have multiple containers.
+        # For now, we assume one node is running on the host from Prometheus's perspective.
+        labels:
+          instance: 'local-node-1'
