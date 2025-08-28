@@ -61,17 +61,23 @@ function listen(port::Int)
 end
 
 """
-    connect(host::String, port::Int)
+    connect(host::String, port::Int) -> Bool
 
 Establishes a connection to a peer at the given host and port.
-Returns a connection object or handles it internally.
+If successful, it spawns a task to handle the connection and returns `true`.
+If the connection fails, it returns `false`.
 """
 function connect(host::String, port::Int)
-    println("P2P Client: Attempting to connect to peer at $host:$port...")
-    # A real implementation would use Sockets.connect() and, upon success,
-    # add the new peer to a list of active connections.
-    # It would then start a task to handle messages from that peer.
-    return true # Placeholder for successful connection
+    try
+        socket = Sockets.connect(host, port)
+        println("P2P Client: Successfully connected to peer at $host:$port.")
+        # Handle the new connection in a separate, non-blocking task.
+        @async _handle_connection(socket)
+        return true
+    catch ex
+        println("P2P Client: Failed to connect to peer at $host:$port. Reason: $ex")
+        return false
+    end
 end
 
 """
