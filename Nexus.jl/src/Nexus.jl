@@ -5,11 +5,13 @@ module Nexus
 module Core
     include("Core/Types.jl")
     include("Core/Constants.jl")
+    include("Core/Mempool.jl")
+    export Mempool
 end
 
 # Expose core types at the top level for convenience
 using .Core
-export Transaction, Block
+export Transaction, Block, TransactionPayload, Mempool
 
 
 # --- Networking Module ---

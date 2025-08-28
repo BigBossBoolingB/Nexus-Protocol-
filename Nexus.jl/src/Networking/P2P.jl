@@ -31,8 +31,13 @@ function process_message(line::String)
 
         # Pass the transaction to the consensus layer for validation.
         if PoA.validate(tx)
-            println("P2P: Transaction ACCEPTED by consensus.")
-            # In the future, this transaction would be added to the mempool.
+            println("P2P: Transaction passed validation. Adding to mempool...")
+            was_added = Mempool.add!(tx)
+            if was_added
+                println("P2P: Transaction successfully added to mempool.")
+            else
+                println("P2P: Transaction was already in the mempool (ignored).")
+            end
             return true
         else
             println("P2P: Transaction REJECTED by consensus.")

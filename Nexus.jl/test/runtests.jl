@@ -6,7 +6,10 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../src"))
 
 @testset "Nexus.jl: The Complete Test Suite" begin
     println("Running Core tests...")
-    @testset "Core" begin include("core.jl") end
+    @testset "Core" begin
+        include("core.jl")
+        include("mempool.jl")
+    end
 
     println("\nRunning Networking tests...")
     @testset "Networking" begin include("networking.jl") end
