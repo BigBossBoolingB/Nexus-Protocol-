@@ -1,29 +1,13 @@
-# Add the project's src directory to the load path to find the Nexus module
+using Test
+
+# Add the project's src directory to the load path to find the Nexus module.
+# This only needs to be done once in the main runner.
 push!(LOAD_PATH, joinpath(@__DIR__, "../src"))
 
-using Test
-using Nexus
+@testset "Nexus.jl: The Complete Test Suite" begin
+    println("Running Core tests...")
+    @testset "Core" begin include("core.jl") end
 
-@testset "Nexus.jl Core Tests" begin
-    # Test if the core types are defined and accessible
-    @test isdefined(Nexus, :Transaction)
-    @test isdefined(Nexus, :Block)
-
-    # Test instantiation of the Transaction struct
-    let
-        tx = Transaction("Alice", "Bob", 10.5, UInt8[])
-        @test tx.source == "Alice"
-        @test tx.destination == "Bob"
-        @test tx.amount == 10.5
-        @test tx.signature == UInt8[]
-    end
-
-    # Test instantiation of the Block struct
-    let
-        tx = Transaction("Alice", "Bob", 10.5, UInt8[])
-        b = Block(Dict("index" => 1, "timestamp" => 1672531200), [tx])
-        @test b.header["index"] == 1
-        @test !isempty(b.transactions)
-        @test b.transactions[1].source == "Alice"
-    end
+    println("\nRunning Networking tests...")
+    @testset "Networking" begin include("networking.jl") end
 end
