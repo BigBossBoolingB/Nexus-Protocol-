@@ -33,3 +33,18 @@ output "sentinel_node_public_ip" {
   description = "Public IP of the deployed Nexus Sentinel node."
   value       = module.nexus_sentinel_1.sentinel_public_ip
 }
+
+# Instantiate our custom Nomad module to deploy a swarm of 3 nodes.
+module "nexus_nomad_swarm" {
+  source = "./modules/nomad"
+
+  node_count = 3
+  # We could also override other variables, e.g.:
+  # instance_type = "t3.micro"
+}
+
+# Output the list of public IPs for the Nomad swarm.
+output "nomad_swarm_public_ips" {
+  description = "Public IPs of the deployed Nexus Nomad swarm."
+  value       = module.nexus_nomad_swarm.nomad_public_ips
+}
