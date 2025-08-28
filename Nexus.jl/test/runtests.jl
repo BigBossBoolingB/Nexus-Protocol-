@@ -10,4 +10,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../src"))
 
     println("\nRunning Networking tests...")
     @testset "Networking" begin include("networking.jl") end
+
+    println("\nRunning Consensus tests...")
+    @testset "Consensus" begin include("consensus.jl") end
 end

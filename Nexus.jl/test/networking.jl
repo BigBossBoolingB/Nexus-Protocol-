@@ -47,4 +47,38 @@ using Nexus.Networking.P2P
         end
     end
 
+    @testset "P2P.process_message" begin
+        # This requires JSON to be available in the test environment
+        using JSON
+
+        @test isdefined(P2P, :process_message)
+
+        # Test the success case with a valid transaction
+        let
+            payload = TransactionPayload("Charlie", 50.0, time())
+            tx = Transaction(payload, rand(UInt8, 32), rand(UInt8, 64))
+
+            # Manually create the dictionary and then the JSON string
+            tx_dict = Dict(
+                "payload" => Dict(
+                    "destination" => tx.payload.destination,
+                    "amount" => tx.payload.amount,
+                    "timestamp" => tx.payload.timestamp
+                ),
+                "sender_pubkey" => tx.sender_pubkey,
+                "signature" => tx.signature
+            )
+            json_string = JSON.json(tx_dict)
+
+            # Since PoA.validate is a placeholder returning true, we expect success
+            @test P2P.process_message(json_string) == true
+        end
+
+        # Test the failure case with malformed JSON
+        let
+            malformed_json = "{\"payload\": {\"destination\": \"Dave\"}}"
+            @test P2P.process_message(malformed_json) == false
+        end
+    end
+
 end

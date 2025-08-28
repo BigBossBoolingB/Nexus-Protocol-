@@ -2,33 +2,68 @@ using Sockets
 
 module P2P
 
-# This module will handle the peer-to-peer communication logic.
-# We assume that the `Peer` type from Networking/Types.jl will be
-# available in the scope where these functions are called.
+"""
+    process_message(line::String) -> Bool
+
+Processes a single line of text received from a peer, which is expected
+to be a JSON-encoded transaction. It deserializes and validates the transaction.
+
+Returns `true` if the transaction is valid and accepted, `false` otherwise.
+"""
+function process_message(line::String)
+    println("P2P: Processing message: $line")
+    try
+        tx_dict = JSON.parse(line)
+        # Manual deserialization. In production, a library like StructTypes.jl
+        # would automate this safely.
+        payload = TransactionPayload(
+            tx_dict["payload"]["destination"],
+            tx_dict["payload"]["amount"],
+            tx_dict["payload"]["timestamp"]
+        )
+        tx = Transaction(
+            payload,
+            Vector{UInt8}(tx_dict["sender_pubkey"]),
+            Vector{UInt8}(tx_dict["signature"])
+        )
+
+        println("P2P: Deserialized transaction successfully.")
+
+        # Pass the transaction to the consensus layer for validation.
+        if PoA.validate(tx)
+            println("P2P: Transaction ACCEPTED by consensus.")
+            # In the future, this transaction would be added to the mempool.
+            return true
+        else
+            println("P2P: Transaction REJECTED by consensus.")
+            return false
+        end
+
+    catch ex
+        println("P2P: Failed to process message. Error: $ex. Dropping message.")
+        return false
+    end
+end
+
 
 """
     _handle_connection(socket::TCPSocket)
 
-Handles an incoming connection from a peer. This function is intended to
-be run in its own asynchronous task. It reads messages from the socket
-and processes them.
+Handles an incoming connection from a peer. It reads data from the socket
+line by line and passes each line to the `process_message` function.
 """
 function _handle_connection(socket::TCPSocket)
     peer_info = getpeername(socket)
     println("P2P: New connection from $peer_info")
     try
         while !eof(socket)
-            # In a real implementation, we would read data according to a
-            # specific message-framing protocol (e.g., length-prefixing).
-            # For now, we'll just read a line for demonstration.
             line = readline(socket)
-            println("P2P: Received message from $peer_info: $line")
-
-            # Here we would parse the message and dispatch it to the
-            # appropriate handler (e.g., for transactions, blocks, etc.)
+            if !isempty(line)
+                process_message(line)
+            end
         end
     catch ex
-        println("P2P: Error handling connection from $peer_info: $ex")
+        println("P2P: Connection error with $peer_info: $ex")
     finally
         println("P2P: Closing connection from $peer_info")
         close(socket)
@@ -54,8 +89,6 @@ function listen(port::Int)
             @async _handle_connection(socket)
         catch ex
             println("P2P Server: Error accepting connection: $ex")
-            # Depending on the error, we might want to break the loop
-            # or just log it and continue. For now, we continue.
         end
     end
 end
@@ -88,8 +121,6 @@ Broadcasts a serialized message to all currently connected peers.
 function broadcast(message::Vector{UInt8})
     num_peers = 0 # Placeholder for the actual number of connected peers
     println("P2P Broadcast: Propagating message to $num_peers peers...")
-    # A real implementation would iterate through a list of active peer
-    # connections and write the message bytes to each socket.
 end
 
 end # module P2P
