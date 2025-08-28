@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forging Your First Transaction - The Codex</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>API & dApp Codex</h1>
+        <a href="../index.html">&larr; Back to The Codex</a>
+    </header>
+    <main>
+        <h2>Chapter 1: Forging Your First Transaction</h2>
+        <p>This guide provides the foundational knowledge for any developer to interact with the Nexus Protocol by constructing, signing, and broadcasting a transaction.</p>
+
+        <h3>1. The Core Data Structures</h3>
+        <p>The protocol is built upon two fundamental data structures: the `Transaction` and the `Block`.</p>
+
+        <h4>Transaction</h4>
+        <p>A transaction is composed of two parts: the payload (the data being signed) and a wrapper containing the signature and sender's public key.</p>
+        <pre><code># The data that is signed
+struct TransactionPayload
+    destination::String  # Recipient Address or Data
+    amount::Float64      # Amount of currency or data value
+    timestamp::Float64   # Unix timestamp for uniqueness
+end
+
+# The full transaction wrapper
+struct Transaction
+    payload::TransactionPayload
+    sender_pubkey::Vector{UInt8} # Sender's public key
+    signature::Vector{UInt8}     # Signature of the hashed payload
+end</code></pre>
+
+        <h4>Block</h4>
+        <p>A block is a collection of transactions, linked together with a cryptographic hash to form the chain.</p>
+        <pre><code>struct Block
+    header::Dict{String, Any}    # Metadata (index, timestamp, previous_hash, merkle_root)
+    transactions::Vector{Transaction} # The list of included transactions
+end</code></pre>
+
+        <h3>2. The RPC Interface</h3>
+        <p>To broadcast a transaction to the network, you will interact with a node's JSON-RPC endpoint. This is a standard way to communicate with a blockchain node programmatically.</p>
+
+        <h4>Endpoint: <code>broadcast_transaction</code></h4>
+        <p>This is the primary method for submitting a new transaction to the network's mempool.</p>
+        <ul>
+            <li><strong>Request:</strong> A JSON object containing a single, fully-formed `Transaction` object (serialized as a JSON string).</li>
+            <li><strong>Response:</strong> A JSON object indicating success or failure.</li>
+        </ul>
+        <pre><code>// Example Request Body
+{
+  "jsonrpc": "2.0",
+  "method": "broadcast_transaction",
+  "params": {
+    "transaction": {
+      "payload": {
+        "destination": "some-address",
+        "amount": 10.5,
+        "timestamp": 1672531200.0
+      },
+      "sender_pubkey": [ ... bytes ... ],
+      "signature": [ ... bytes ... ]
+    }
+  },
+  "id": 1
+}</code></pre>
+
+        <h3>3. "Hello, World" Example (Python)</h3>
+        <p>This example demonstrates how to construct and broadcast a transaction using Python. Note that the signing step is conceptual and requires a real cryptographic library.</p>
+        <pre><code>import requests
+import json
+import time
+# A conceptual cryptography library
+# from your_crypto_lib import sign, get_public_key
+
+# 1. Node RPC endpoint
+RPC_URL = "http://localhost:8788" # Default RPC port
+
+# 2. Your private key (NEVER expose this in production code)
+# private_key = "YOUR_PRIVATE_KEY"
+
+def forge_and_broadcast_transaction():
+    # 3. Create the transaction payload
+    payload = {
+        "destination": "Bobs-Address-Or-Data-ID",
+        "amount": 12.34,
+        "timestamp": time.time()
+    }
+
+    # 4. Sign the payload (Conceptual)
+    # In a real system, you would serialize the payload to a canonical
+    # format, hash it, and then sign the hash with your private key.
+    # payload_hash = hash(json.dumps(payload, sort_keys=True))
+    # signature = sign(payload_hash, private_key)
+    # my_public_key = get_public_key(private_key)
+
+    # For this example, we'll use placeholder values.
+    signature = [1, 2, 3]
+    my_public_key = [4, 5, 6]
+
+    # 5. Construct the full transaction
+    transaction = {
+        "payload": payload,
+        "sender_pubkey": my_public_key,
+        "signature": signature
+    }
+
+    # 6. Construct the JSON-RPC request
+    rpc_request = {
+        "jsonrpc": "2.0",
+        "method": "broadcast_transaction",
+        "params": {"transaction": transaction},
+        "id": 1
+    }
+
+    # 7. Send the transaction
+    try:
+        response = requests.post(RPC_URL, json=rpc_request)
+        response.raise_for_status() # Raise an exception for bad status codes
+        print("Successfully broadcasted transaction!")
+        print("Response:", response.json())
+    except requests.exceptions.RequestException as e:
+        print(f"Error broadcasting transaction: {e}")
+
+if __name__ == "__main__":
+    forge_and_broadcast_transaction()
+</code></pre>
+    </main>
+</body>
+</html>
