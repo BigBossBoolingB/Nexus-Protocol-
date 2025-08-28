@@ -103,7 +103,51 @@ function forge_block()
     Mempool.clear!()
     println("BlockBuilder: Mempool cleared.")
 
+    # NOTE: The calling process (e.g., the main node loop) is responsible
+    # for broadcasting this new block to the network via P2P.broadcast().
     return new_block
+end
+
+
+"""
+    validate_and_append_block(block::Block) -> Bool
+
+Validates a block received from a peer and, if valid, appends it to the
+local blockchain.
+
+Validation checks include:
+- The block's index must be correct.
+- The block's `previous_hash` must match the hash of the current latest block.
+"""
+function validate_and_append_block(block::Block)
+    try
+        latest_block = last(BLOCKCHAIN)
+
+        # 1. Validate the index
+        expected_index = latest_block.header["index"] + 1
+        if block.header["index"] != expected_index
+            println("Block Validation FAILED: Invalid index. Expected $expected_index, got $(block.header["index"]).")
+            return false
+        end
+
+        # 2. Validate the previous_hash
+        expected_previous_hash = get_previous_hash()
+        if block.header["previous_hash"] != expected_previous_hash
+            println("Block Validation FAILED: Invalid previous_hash.")
+            return false
+        end
+
+        # (Future validations: check timestamp, PoA difficulty, etc.)
+
+        # If all checks pass, append the block to the chain.
+        push!(BLOCKCHAIN, block)
+        println("Block Validation PASSED: New block appended to the local chain.")
+        return true
+
+    catch ex
+        println("Block Validation ERROR: An unexpected error occurred: $ex")
+        return false
+    end
 end
 
 

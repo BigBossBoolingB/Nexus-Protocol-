@@ -60,4 +60,35 @@ using JSON
         end
     end
 
+    @testset "validate_and_append_block Function" begin
+        # Ensure a known state
+        while length(BlockBuilder.BLOCKCHAIN) > 1 pop!(BlockBuilder.BLOCKCHAIN) end
+
+        let # Success case
+            previous_hash = BlockBuilder.get_previous_hash()
+            header = Dict("index" => 1, "previous_hash" => previous_hash, "timestamp" => time(), "merkle_root" => "abc")
+            valid_block = Block(header, [])
+
+            @test BlockBuilder.validate_and_append_block(valid_block) == true
+            @test length(BlockBuilder.BLOCKCHAIN) == 2
+        end
+
+        let # Failure case: bad index
+            previous_hash = BlockBuilder.get_previous_hash()
+            header = Dict("index" => 3, "previous_hash" => previous_hash, "timestamp" => time(), "merkle_root" => "def")
+            invalid_block = Block(header, [])
+
+            @test BlockBuilder.validate_and_append_block(invalid_block) == false
+            @test length(BlockBuilder.BLOCKCHAIN) == 2 # Should not have changed
+        end
+
+        let # Failure case: bad previous_hash
+            header = Dict("index" => 3, "previous_hash" => "wrong_hash", "timestamp" => time(), "merkle_root" => "ghi")
+            invalid_block = Block(header, [])
+
+            @test BlockBuilder.validate_and_append_block(invalid_block) == false
+            @test length(BlockBuilder.BLOCKCHAIN) == 2 # Should not have changed
+        end
+    end
+
 end
